@@ -1,32 +1,21 @@
-println "DEBUG: Starting job definition for 'NodeJS Docker example'"
-
 job('NodeJS Docker example') {
-    println "DEBUG: Inside job block for 'NodeJS Docker example'"
-
     scm {
-        println "DEBUG: Setting up Git SCM for 'NodeJS Docker example'"
-        git('https://github.com/charlesajah/devops.git') { node ->
+        git('https://github.com/charlesajah/devops.git') {  node -> // is hudson.plugins.git.GitSCM
             node / gitConfigName('DSL User')
             node / gitConfigEmail('charles.ajah@gmail.com')
         }
     }
-
     triggers {
-        println "DEBUG: Setting SCM polling trigger"
         scm('H/5 * * * *')
     }
-
     wrappers {
-        println "DEBUG: Applying NodeJS wrapper"
-        nodejs('nodejs')
+        nodejs('nodejs') // this is the name of the NodeJS installation in 
+                         // Manage Jenkins -> Configure Tools -> NodeJS Installations -> Name
     }
-
     steps {
-        println "DEBUG: Starting dockerBuildAndPublish step"
         dockerBuildAndPublish {
-            println "DEBUG: Inside dockerBuildAndPublish config block"
             repositoryName('dev1980/devcharles')
-            tag('latest')  // Temporarily simplified tag
+            tag('${GIT_REVISION,length=9}')
             registryCredentials('dockerhub')
             forcePull(false)
             forceTag(false)
@@ -34,6 +23,4 @@ job('NodeJS Docker example') {
             skipDecorate()
         }
     }
-
-    println "DEBUG: Finished defining job 'NodeJS Docker example'"
 }
